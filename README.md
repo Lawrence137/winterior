@@ -34,3 +34,20 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+src/
+├─ app/
+│  ├─ (site)/            # public pages (home, collections, projects, configurator, about, contact)
+│  ├─ api/               # inquiries (quote form), upload (presigned R2 URLs)
+│  ├─ layout.tsx
+│  └─ globals.css
+├─ components/
+│  ├─ layout/            # Navbar, Footer, SmoothScroll (Lenis)
+│  ├─ home/              # homepage sections
+│  ├─ gallery/           # masonry, lightbox, before/after
+│  ├─ three/             # all R3F code lives here
+│  └─ ui/                # Button, Reveal, TiltCard
+├─ lib/                  # db, r2, utils
+├─ hooks/
+└─ data/                 # static category data
+public/{models,hdri,images}
