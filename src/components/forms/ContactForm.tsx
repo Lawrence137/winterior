@@ -1,8 +1,7 @@
 "use client";
 import { useState } from "react";
 import { categories } from "@/data/categories";
-
-const WHATSAPP_NUMBER = "254728846560"; // TODO: replace with the real number, digits only
+import { WHATSAPP_NUMBER } from "@/lib/config";
 
 const field = "w-full border-b border-ink/30 bg-transparent py-3 outline-none transition focus:border-brass";
 
