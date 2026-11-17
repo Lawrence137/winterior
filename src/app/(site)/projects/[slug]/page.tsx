@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getProject, projects } from "@/data/projects";
+import { getProject, getProjects } from "@/lib/queries";
 import { getCategory } from "@/data/categories";
 import PageHeader from "@/components/ui/PageHeader";
 import Reveal from "@/components/ui/Reveal";
@@ -11,23 +11,23 @@ import CTA from "@/components/home/CTA";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return projects.map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  return (await getProjects()).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const p = getProject(slug);
+  const p = await getProject(slug);
   return { title: p ? `${p.title} | Winterior Design` : "Project", description: p?.summary };
 }
 
 export default async function ProjectPage({ params }: Props) {
   const { slug } = await params;
-  const project = getProject(slug);
+  const project = await getProject(slug);
   if (!project) notFound();
 
   const category = getCategory(project.category);
-  const related = projects.filter((p) => p.slug !== slug).slice(0, 3);
+  const related = (await getProjects()).filter((p) => p.slug !== slug).slice(0, 3);
 
   return (
     <>
@@ -43,15 +43,19 @@ export default async function ProjectPage({ params }: Props) {
           <div className="grid gap-6 sm:grid-cols-2">
             {project.gallery.map((img, i) => (
               <Reveal key={i} delay={(i % 2) * 0.1} className={i === 0 ? "sm:col-span-2" : ""}>
-                <Image
-                  src={img.src}
-                  alt={img.alt}
-                  width={img.width}
-                  height={img.height}
-                  sizes={i === 0 ? "100vw" : "(min-width: 640px) 50vw, 100vw"}
-                  className="h-auto w-full"
-                  priority={i === 0}
-                />
+                {img.type === "video" ? (
+                  <video src={img.src} poster={img.poster ?? undefined} controls playsInline preload="metadata" className="h-auto w-full bg-ink" />
+                ) : (
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    width={img.width}
+                    height={img.height}
+                    sizes={i === 0 ? "100vw" : "(min-width: 640px) 50vw, 100vw"}
+                    className="h-auto w-full"
+                    priority={i === 0}
+                  />
+                )}
               </Reveal>
             ))}
           </div>

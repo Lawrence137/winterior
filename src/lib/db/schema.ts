@@ -2,44 +2,48 @@ import { pgTable, serial, text, integer, timestamp, boolean, pgEnum } from "driz
 
 export const mediaType = pgEnum("media_type", ["image", "video"]);
 
-export const categories = pgTable("categories", {
-  id: serial("id").primaryKey(),
-  slug: text("slug").notNull().unique(), // kitchen-cabinets, closets-wardrobes, bathroom-vanities, tv-units
-  name: text("name").notNull(),
-  description: text("description"),
-  coverUrl: text("cover_url"),
-});
-
 export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   slug: text("slug").notNull().unique(),
   title: text("title").notNull(),
   summary: text("summary"),
   location: text("location"),
-  categoryId: integer("category_id").references(() => categories.id),
+  year: integer("year"),
+  category: text("category").notNull(), // slug from data/categories.ts
   featured: boolean("featured").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
+  beforeUrl: text("before_url"),
+  afterUrl: text("after_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const media = pgTable("media", {
   id: serial("id").primaryKey(),
-  projectId: integer("project_id").references(() => projects.id, { onDelete: "cascade" }),
+  projectId: integer("project_id").references(() => projects.id, { onDelete: "cascade" }).notNull(),
   type: mediaType("type").notNull().default("image"),
-  url: text("url").notNull(),        // R2 public URL
-  posterUrl: text("poster_url"),     // for videos
+  url: text("url").notNull(),
+  key: text("key").notNull(), // Cloudinary "<resource_type>:<public_id>", used for deletion
+  posterUrl: text("poster_url"),
   width: integer("width"),
   height: integer("height"),
-  blurDataUrl: text("blur_data_url"),
   alt: text("alt"),
-  sortOrder: integer("sort_order").default(0),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// One row per replaceable image on the site (hero, category cards, etc.)
+export const siteMedia = pgTable("site_media", {
+  slot: text("slot").primaryKey(),
+  url: text("url").notNull(),
+  key: text("key").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const inquiries = pgTable("inquiries", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  email: text("email").notNull(),
+  email: text("email"),
   phone: text("phone"),
   interest: text("interest"),
   message: text("message"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });

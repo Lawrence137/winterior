@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/queries";
 import Reveal from "@/components/ui/Reveal";
 
-export default function FeaturedProjects() {
-  const featured = projects.slice(0, 3);
+export default async function FeaturedProjects() {
+  const featured = (await getProjects()).slice(0, 3);
   return (
     <section className="px-6 py-28">
       <div className="mx-auto max-w-7xl">

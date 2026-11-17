@@ -1,4 +1,7 @@
-export type ProjectImage = { src: string; width: number; height: number; alt: string };
+export type ProjectImage = {
+  src: string; width: number; height: number; alt: string;
+  type?: "image" | "video"; poster?: string | null;
+};
 
 export type Project = {
   slug: string;
@@ -15,10 +18,10 @@ export type Project = {
 // Placeholder images reuse the files in /public/images. Replace with real photos
 // (and real width/height) when you have them.
 const hero = (alt: string): ProjectImage => ({ src: "/images/hero.jpg", width: 1920, height: 1080, alt });
-const kitchen = (alt: string): ProjectImage => ({ src: "/images/kitchen.jpg", width: 1000, height: 1250, alt });
-const wardrobe = (alt: string): ProjectImage => ({ src: "/images/wardrobe.jpg", width: 1000, height: 1250, alt });
-const vanity = (alt: string): ProjectImage => ({ src: "/images/vanity.jpg", width: 1000, height: 1250, alt });
-const tv = (alt: string): ProjectImage => ({ src: "/images/tv-unit.jpg", width: 1000, height: 1250, alt });
+const kitchen = (alt: string): ProjectImage => ({ src: "/images/kitchen.webp", width: 1000, height: 1250, alt });
+const wardrobe = (alt: string): ProjectImage => ({ src: "/images/wardrobe.webp", width: 1000, height: 1250, alt });
+const vanity = (alt: string): ProjectImage => ({ src: "/images/vanity.webp", width: 1000, height: 1250, alt });
+const tv = (alt: string): ProjectImage => ({ src: "/images/tv-unit.webp", width: 1000, height: 1250, alt });
 
 export const projects: Project[] = [
   {
@@ -30,7 +33,7 @@ export const projects: Project[] = [
     summary: "A warm oak and matte white kitchen with a full-height pantry wall and a quartz island.",
     cover: kitchen("Oak and white kitchen"),
     gallery: [hero("Kitchen wide view"), kitchen("Island detail"), kitchen("Pantry wall")],
-    beforeAfter: { before: "/images/vanity.jpg", after: "/images/kitchen.jpg" },
+    beforeAfter: { before: "/images/vanity.webp", after: "/images/kitchen.webp" },
   },
   {
     slug: "kilimani-walk-in-closet",

@@ -1,14 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/components/ui/Reveal";
+import { getSlots } from "@/lib/queries";
 
-export default function Craft() {
+export default async function Craft() {
+  const slots = await getSlots();
   return (
     <section className="px-6 py-28">
       <div className="mx-auto grid max-w-7xl items-center gap-16 md:grid-cols-2">
         <Reveal>
           <div className="relative aspect-[4/5] overflow-hidden bg-walnut">
-            <Image src="/images/kitchen.jpg" alt="Detail of custom cabinetry" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
+            <Image src={slots.craft} alt="Detail of custom cabinetry" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
           </div>
         </Reveal>
         <Reveal delay={0.15}>

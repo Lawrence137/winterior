@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 
-export default function Hero() {
+export default function Hero({ image = "/images/hero.jpg" }: { image?: string }) {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
@@ -15,7 +15,7 @@ export default function Hero() {
   return (
     <section ref={ref} className="relative h-screen min-h-[640px] overflow-hidden bg-ink">
       <motion.div style={{ y: imageY, scale: imageScale }} className="absolute inset-0">
-        <Image src="/images/hero.jpg" alt="Luxury custom kitchen by Winterior Design" fill priority sizes="100vw" className="object-cover" />
+        <Image src={image} alt="Luxury custom kitchen by Winterior Design" fill priority sizes="100vw" className="object-cover" />
       </motion.div>
       <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/30 to-ink/40" />
 

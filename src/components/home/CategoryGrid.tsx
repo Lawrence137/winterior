@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { categories } from "@/data/categories";
+import { getSlots } from "@/lib/queries";
 import Reveal from "@/components/ui/Reveal";
 import TiltCard from "@/components/ui/TiltCard";
 
-export default function CategoryGrid() {
+export default async function CategoryGrid() {
+  const slots = await getSlots();
   return (
     <section className="px-6 py-28">
       <div className="mx-auto max-w-7xl">
@@ -21,7 +23,7 @@ export default function CategoryGrid() {
               <TiltCard>
                 <Link href={`/collections/${c.slug}`} className="group relative block aspect-[4/5] overflow-hidden bg-walnut">
                   <Image
-                    src={c.image}
+                    src={slots[`category-${c.slug}`]}
                     alt={c.name}
                     fill
                     sizes="(min-width: 640px) 50vw, 100vw"
