@@ -1,9 +1,10 @@
 import { cache } from "react";
-import { asc, desc } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { projects, media, siteMedia } from "@/lib/db/schema";
+import { projects, media, siteMedia, categoryMedia } from "@/lib/db/schema";
 import { projects as staticProjects, type Project, type ProjectImage } from "@/data/projects";
 import { SLOTS } from "@/data/slots";
+import { categories, getCategory } from "@/data/categories";
 
 const PLACEHOLDER: ProjectImage = { src: "/images/hero.jpg", width: 1920, height: 1080, alt: "Winterior project" };
 
@@ -54,6 +55,52 @@ export const getSlots = cache(async (): Promise<Record<string, string>> => {
     }
   } catch (e) {
     console.error("getSlots failed, using fallbacks", e);
+  }
+  return out;
+});
+
+// All media for one category. Falls back to the static image until you upload some.
+export const getCategoryMedia = cache(async (slug: string): Promise<ProjectImage[]> => {
+  const category = getCategory(slug);
+  const fallback: ProjectImage[] = category
+    ? [{ src: category.image, width: 1000, height: 1250, alt: category.name }]
+    : [];
+  try {
+    const rows = await db
+      .select()
+      .from(categoryMedia)
+      .where(eq(categoryMedia.category, slug))
+      .orderBy(asc(categoryMedia.sortOrder), asc(categoryMedia.id));
+    if (!rows.length) return fallback;
+    return rows.map((m) => ({
+      src: m.url,
+      width: m.width ?? 1600,
+      height: m.height ?? 1067,
+      alt: m.alt ?? category?.name ?? "Winterior",
+      type: m.type,
+      poster: m.posterUrl,
+    }));
+  } catch (e) {
+    console.error("getCategoryMedia failed, using fallback", e);
+    return fallback;
+  }
+});
+
+// Cover image and item count per category, for the homepage cards
+export const getCategoryCovers = cache(async () => {
+  const out: Record<string, { image: string; count: number }> = Object.fromEntries(
+    categories.map((c) => [c.slug, { image: c.image, count: 0 }])
+  );
+  try {
+    const rows = await db.select().from(categoryMedia).orderBy(asc(categoryMedia.sortOrder), asc(categoryMedia.id));
+    for (const c of categories) {
+      const mine = rows.filter((r) => r.category === c.slug);
+      const cover = mine.find((r) => r.type === "image");
+      if (cover) out[c.slug].image = cover.url;
+      out[c.slug].count = mine.length;
+    }
+  } catch (e) {
+    console.error("getCategoryCovers failed, using fallback", e);
   }
   return out;
 });

@@ -63,6 +63,21 @@ export default async function AdminPage() {
       </section>
 
       <section>
+        <h2 className="font-display text-3xl">Categories</h2>
+        <p className="mt-2 text-sm text-ink/60">Add or remove photos and videos for each collection.</p>
+      <ul className="mt-6 divide-y divide-ink/10 border-y border-ink/10">
+          {categories.map((c) => (
+         <li key={c.slug}>
+         <Link href={`/admin/categories/${c.slug}`} className="flex justify-between py-4 transition hover:text-brass">
+          <span>{c.name}</span>
+          <span className="text-sm text-ink/50">Manage media →</span>
+        </Link>
+        </li>
+          ))}
+      </ul>
+     </section>
+
+      <section>
         <h2 className="font-display text-3xl">Site images</h2>
         <p className="mt-2 text-sm text-ink/60">
           Replace the main images used around the site. Uploading a new one replaces the old.

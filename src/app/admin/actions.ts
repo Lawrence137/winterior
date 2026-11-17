@@ -4,9 +4,10 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { projects, media, siteMedia } from "@/lib/db/schema";
+import { projects, media, siteMedia, categoryMedia } from "@/lib/db/schema";
 import { COOKIE, createToken, verifyToken, safeEqual } from "@/lib/auth";
 import { deleteObject } from "@/lib/cloudinary";
+import { categories } from "@/data/categories";
 
 export type Uploaded = { url: string; key: string; type: "image" | "video"; width: number; height: number };
 
@@ -140,4 +141,41 @@ export async function updateProject(formData: FormData) {
 
   refresh();
   redirect(`/admin/projects/${id}?saved=1`);
+}
+
+export async function addCategoryMedia(category: string, m: Uploaded) {
+  await requireAdmin();
+  if (!categories.some((c) => c.slug === category)) return;
+  const [{ n }] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(categoryMedia)
+    .where(eq(categoryMedia.category, category));
+  await db.insert(categoryMedia).values({ category, ...m, sortOrder: n });
+  refresh();
+}
+
+export async function deleteCategoryMedia(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  const [row] = await db.select().from(categoryMedia).where(eq(categoryMedia.id, id));
+  if (!row) return;
+  try {
+    await deleteObject(row.key);
+  } catch (e) {
+    console.error("Cloudinary delete failed", e);
+  }
+  await db.delete(categoryMedia).where(eq(categoryMedia.id, id));
+  refresh();
+}
+
+export async function makeCategoryCover(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  const category = String(formData.get("category"));
+  const [{ min }] = await db
+    .select({ min: sql<number>`coalesce(min(${categoryMedia.sortOrder}), 0)::int` })
+    .from(categoryMedia)
+    .where(eq(categoryMedia.category, category));
+  await db.update(categoryMedia).set({ sortOrder: min - 1 }).where(eq(categoryMedia.id, id));
+  refresh();
 }

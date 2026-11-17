@@ -47,3 +47,17 @@ export const inquiries = pgTable("inquiries", {
   message: text("message"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const categoryMedia = pgTable("category_media", {
+  id: serial("id").primaryKey(),
+  category: text("category").notNull(), // slug from data/categories.ts
+  type: mediaType("type").notNull().default("image"),
+  url: text("url").notNull(),
+  key: text("key").notNull(), // Cloudinary "<resource_type>:<public_id>"
+  posterUrl: text("poster_url"),
+  width: integer("width"),
+  height: integer("height"),
+  alt: text("alt"),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
