@@ -10,6 +10,7 @@ const links = [
   { href: "/collections/kitchen-cabinets", label: "Collections" },
   { href: "/projects", label: "Projects" },
   { href: "/configurator", label: "Configurator" },
+  { href: "/insights", label: "Insights" },
   { href: "/about", label: "About" },
 ];
 
