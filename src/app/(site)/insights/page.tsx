@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import CTA from "@/components/home/CTA";
 import PageHeader from "@/components/ui/PageHeader";
 import Reveal from "@/components/ui/Reveal";
-import { insights } from "@/data/insights";
+import { getInsights } from "@/lib/queries";
 
 export const metadata: Metadata = {
   title: "Insights | Winterior Design",
@@ -12,7 +12,8 @@ export const metadata: Metadata = {
     "Practical ideas and inspiration for kitchens, wardrobes, bathroom vanities and thoughtful interiors.",
 };
 
-export default function InsightsPage() {
+export default async function InsightsPage() {
+  const insights = await getInsights();
   const [featured, ...articles] = insights;
 
   return (

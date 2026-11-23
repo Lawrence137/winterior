@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { projects, media, siteMedia, categoryMedia } from "@/lib/db/schema";
+import { projects, media, siteMedia, categoryMedia, insights } from "@/lib/db/schema";
 import { COOKIE, createToken, verifyToken, safeEqual } from "@/lib/auth";
 import { deleteObject } from "@/lib/cloudinary";
 import { categories } from "@/data/categories";
@@ -178,4 +178,100 @@ export async function makeCategoryCover(formData: FormData) {
     .where(eq(categoryMedia.category, category));
   await db.update(categoryMedia).set({ sortOrder: min - 1 }).where(eq(categoryMedia.id, id));
   refresh();
+}
+
+export async function createInsight(formData: FormData) {
+  await requireAdmin();
+  const title = String(formData.get("title") ?? "").trim();
+  if (!title) return;
+
+  let slug = slugify(title) || "insight";
+  const [taken] = await db.select({ id: insights.id }).from(insights).where(eq(insights.slug, slug));
+  if (taken) slug = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
+
+  await db
+    .insert(insights)
+    .values({
+      slug,
+      title,
+      excerpt: String(formData.get("excerpt") ?? "").trim(),
+      category: String(formData.get("category") ?? "").trim(),
+      publishedAt: String(formData.get("publishedAt") || new Date().toISOString().slice(0, 10)),
+      readTime: String(formData.get("readTime") ?? "").trim() || "5 min read",
+      image: String(formData.get("image") ?? "").trim() || "/images/kitchen.webp",
+      imageAlt: String(formData.get("imageAlt") ?? "").trim() || title,
+      sections: [{ heading: "Overview", paragraphs: [String(formData.get("content") ?? "").trim()] }],
+    });
+
+  refresh();
+  redirect(`/admin/insights/${slug}`);
+}
+
+export async function updateInsight(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  const slug = String(formData.get("slug") ?? "").trim();
+  const title = String(formData.get("title") ?? "").trim();
+  if (!title) return;
+
+  let sections: { heading: string; paragraphs: string[] }[];
+  try {
+    sections = JSON.parse(String(formData.get("sections") ?? "[]"));
+  } catch {
+    return;
+  }
+
+  const values = {
+      title,
+      excerpt: String(formData.get("excerpt") ?? "").trim(),
+      category: String(formData.get("category") ?? "").trim(),
+      publishedAt: String(formData.get("publishedAt") ?? "").trim(),
+      readTime: String(formData.get("readTime") ?? "").trim(),
+      image: String(formData.get("image") ?? "").trim(),
+      imageAlt: String(formData.get("imageAlt") ?? "").trim(),
+      sections,
+  };
+
+  if (Number.isInteger(id) && id > 0) {
+    await db.update(insights).set(values).where(eq(insights.id, id));
+  } else if (slug) {
+    const [existing] = await db.select({ id: insights.id }).from(insights).where(eq(insights.slug, slug));
+    if (existing) {
+      await db.update(insights).set(values).where(eq(insights.id, existing.id));
+    } else {
+      await db.insert(insights).values({ slug, ...values });
+    }
+  }
+
+  refresh();
+  redirect(`/admin/insights/${slug || id}?saved=1`);
+}
+
+export async function deleteInsight(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  const slug = String(formData.get("slug") ?? "").trim();
+  if (Number.isInteger(id) && id > 0) {
+    await db.delete(insights).where(eq(insights.id, id));
+  } else if (slug) {
+    const [existing] = await db.select().from(insights).where(eq(insights.slug, slug));
+    if (existing) {
+      await db.update(insights).set({ deleted: true }).where(eq(insights.id, existing.id));
+    } else {
+      await db.insert(insights).values({
+        slug,
+        title: "Deleted insight",
+        excerpt: "",
+        category: "",
+        publishedAt: "",
+        readTime: "",
+        image: "",
+        imageAlt: "",
+        sections: [],
+        deleted: true,
+      });
+    }
+  }
+  refresh();
+  redirect("/admin");
 }

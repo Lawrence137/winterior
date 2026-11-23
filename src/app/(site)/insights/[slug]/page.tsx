@@ -3,17 +3,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import CTA from "@/components/home/CTA";
-import { getInsight, insights } from "@/data/insights";
+import { getInsightBySlug, getInsights } from "@/lib/queries";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const insights = await getInsights();
   return insights.map((insight) => ({ slug: insight.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const insight = getInsight(slug);
+  const insight = await getInsightBySlug(slug);
   if (!insight) return { title: "Article not found | Winterior Design" };
 
   return {
@@ -24,9 +25,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function InsightArticlePage({ params }: Props) {
   const { slug } = await params;
-  const insight = getInsight(slug);
+  const insight = await getInsightBySlug(slug);
   if (!insight) notFound();
 
+  const insights = await getInsights();
   const related = insights.filter((item) => item.slug !== slug).slice(0, 2);
 
   return (

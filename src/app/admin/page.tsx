@@ -6,14 +6,19 @@ import { categories } from "@/data/categories";
 import { SLOTS } from "@/data/slots";
 import { getSlots } from "@/lib/queries";
 import Uploader from "@/components/admin/Uploader";
-import { createProject, logout, setSlot } from "./actions";
+import { createInsight, createProject, logout, setSlot } from "./actions";
+import { getInsights } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
 const input = "w-full border-b border-ink/30 bg-transparent py-2 outline-none focus:border-brass";
 
 export default async function AdminPage() {
-  const [slots, list] = await Promise.all([getSlots(), db.select().from(projects).orderBy(desc(projects.createdAt))]);
+  const [slots, list, insightList] = await Promise.all([
+    getSlots(),
+    db.select().from(projects).orderBy(desc(projects.createdAt)),
+    getInsights(),
+  ]);
 
   return (
     <main className="mx-auto max-w-6xl space-y-20 px-6 py-12">
@@ -58,6 +63,39 @@ export default async function AdminPage() {
           <textarea name="summary" rows={2} placeholder="Short summary" className={`${input} sm:col-span-2`} />
           <button className="w-fit bg-ink px-8 py-3 text-sm tracking-widest text-white uppercase transition hover:bg-brass">
             Create and add media
+          </button>
+        </form>
+      </section>
+
+      <section>
+        <h2 className="font-display text-3xl">Insights</h2>
+        <p className="mt-2 text-sm text-ink/60">Create and manage journal posts shown on the Insights page.</p>
+        <ul className="mt-6 divide-y divide-ink/10 border-y border-ink/10">
+          {insightList.map((insight) => (
+            <li key={insight.slug}>
+              <Link href={`/admin/insights/${insight.slug}`} className="flex justify-between gap-6 py-4 transition hover:text-brass">
+                <span>{insight.title}</span>
+                <span className="shrink-0 text-sm text-ink/50">{insight.category} · Manage →</span>
+              </Link>
+            </li>
+          ))}
+          {insightList.length === 0 && (
+            <li className="py-4 text-sm text-ink/60">No insight posts yet.</li>
+          )}
+        </ul>
+
+        <form action={createInsight} className="mt-10 grid gap-6 sm:grid-cols-2">
+          <p className="text-xs tracking-[0.3em] text-brass uppercase sm:col-span-2">New insight post</p>
+          <input name="title" required placeholder="Title" className={input} />
+          <input name="category" required placeholder="Category" className={input} />
+          <input name="publishedAt" type="date" defaultValue={new Date().toISOString().slice(0, 10)} className={input} />
+          <input name="readTime" placeholder="Read time (e.g. 5 min read)" className={input} />
+          <input name="image" placeholder="Image URL or /images/..." className={input} />
+          <input name="imageAlt" placeholder="Image description" className={input} />
+          <textarea name="excerpt" rows={3} required placeholder="Short excerpt" className={`${input} sm:col-span-2`} />
+          <textarea name="content" rows={8} placeholder="Article body" className={`${input} sm:col-span-2`} />
+          <button className="w-fit bg-ink px-8 py-3 text-sm tracking-widest text-white uppercase transition hover:bg-brass">
+            Create post
           </button>
         </form>
       </section>

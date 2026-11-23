@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp, boolean, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, timestamp, boolean, pgEnum, jsonb } from "drizzle-orm/pg-core";
 
 export const mediaType = pgEnum("media_type", ["image", "video"]);
 
@@ -59,5 +59,20 @@ export const categoryMedia = pgTable("category_media", {
   height: integer("height"),
   alt: text("alt"),
   sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insights = pgTable("insights", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  excerpt: text("excerpt").notNull(),
+  category: text("category").notNull(),
+  publishedAt: text("published_at").notNull(),
+  readTime: text("read_time").notNull(),
+  image: text("image").notNull(),
+  imageAlt: text("image_alt").notNull(),
+  sections: jsonb("sections").$type<{ heading: string; paragraphs: string[] }[]>().notNull(),
+  deleted: boolean("deleted").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

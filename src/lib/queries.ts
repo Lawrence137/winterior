@@ -1,8 +1,9 @@
 import { cache } from "react";
 import { asc, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { projects, media, siteMedia, categoryMedia } from "@/lib/db/schema";
+import { projects, media, siteMedia, categoryMedia, insights as insightRows } from "@/lib/db/schema";
 import { projects as staticProjects, type Project, type ProjectImage } from "@/data/projects";
+import { insights as staticInsights, type Insight } from "@/data/insights";
 import { SLOTS } from "@/data/slots";
 import { categories, getCategory } from "@/data/categories";
 
@@ -104,3 +105,37 @@ export const getCategoryCovers = cache(async () => {
   }
   return out;
 });
+
+export const getInsights = cache(async (): Promise<Insight[]> => {
+  try {
+    const allRows = await db.select().from(insightRows).orderBy(desc(insightRows.publishedAt), desc(insightRows.id));
+    const deletedSlugs = new Set(allRows.filter((r) => r.deleted).map((r) => r.slug));
+    const rows = allRows.filter((r) => !r.deleted);
+    const dbMap = new Map(rows.map((r) => [r.slug, r]));
+    const merged = staticInsights
+      .filter((item) => !dbMap.has(item.slug) && !deletedSlugs.has(item.slug))
+      .map((item) => ({ ...item }))
+      .concat(
+        rows.map((r) => ({
+      slug: r.slug,
+      title: r.title,
+      excerpt: r.excerpt,
+      category: r.category,
+      publishedAt: r.publishedAt,
+      readTime: r.readTime,
+      image: r.image,
+      imageAlt: r.imageAlt,
+      sections: r.sections,
+        }))
+      );
+    if (!merged.length) return staticInsights;
+    return merged.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  } catch (e) {
+    console.error("getInsights failed, using static data", e);
+    return staticInsights;
+  }
+});
+
+export async function getInsightBySlug(slug: string) {
+  return (await getInsights()).find((insight) => insight.slug === slug);
+}
