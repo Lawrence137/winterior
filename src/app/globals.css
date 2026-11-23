@@ -3,12 +3,21 @@
 @theme inline {
   --font-display: var(--font-cormorant), serif;
   --font-sans: var(--font-manrope), sans-serif;
-  --color-ink: #121212;
-  --color-linen: #f4f0ea;
-  --color-walnut: #5a3e2b;
-  --color-brass: #b08d57;
+  --color-ink: #111111;
+  --color-linen: #f1f1ef;
+  --color-silver: #c7c8ca;
+  --color-walnut: #292929;
+  --color-red: #b5121b;
+  --color-brass: var(--color-red);
 }
 
 html { scroll-behavior: auto; }
 body { background: var(--color-linen); color: var(--color-ink); }
 ::selection { background: var(--color-brass); color: white; }
+:focus-visible { outline: 2px solid var(--color-red); outline-offset: 3px; }
+
+@media (forced-colors: active) {
+  :root { --color-ink: CanvasText; --color-linen: Canvas; --color-silver: CanvasText; --color-red: LinkText; --color-brass: LinkText; }
+  ::selection { background: Highlight; color: HighlightText; }
+  :focus-visible { outline-color: Highlight; }
+}

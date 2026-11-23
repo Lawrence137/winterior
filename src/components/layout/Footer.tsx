@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
@@ -5,7 +6,15 @@ export default function Footer() {
     <footer className="bg-ink px-6 py-20 text-white/70">
       <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-3">
         <div>
-          <p className="font-display text-3xl tracking-[0.2em] text-white uppercase">Winterior</p>
+          <Link href="/" className="relative block h-16 w-[192px]" aria-label="Winterior Design home">
+            <Image
+              src="/logo-transparent.png"
+              alt=""
+              fill
+              sizes="192px"
+              className="object-contain object-left"
+            />
+          </Link>
           <p className="mt-4 max-w-xs text-sm">Bespoke kitchens, wardrobes, vanities and TV units, designed and built with care.</p>
         </div>
         <ul className="space-y-2 text-sm">

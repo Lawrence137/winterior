@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
@@ -30,8 +31,15 @@ export default function Navbar() {
       )}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 text-white">
-        <Link href="/" className="font-display text-2xl tracking-[0.2em] uppercase">
-          Winterior
+        <Link href="/" className="relative block h-12 w-[144px]" aria-label="Winterior Design home">
+          <Image
+            src="/logo-transparent.png"
+            alt=""
+            fill
+            priority
+            sizes="144px"
+            className="object-contain object-left"
+          />
         </Link>
 
         <ul className="hidden items-center gap-10 text-sm tracking-widest uppercase md:flex">
